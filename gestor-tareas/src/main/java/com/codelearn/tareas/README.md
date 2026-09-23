@@ -561,3 +561,190 @@ He creado un perfil llamado `repositorio-publico` que utiliza Maven Central y he
 También he comprobado que, sin activar el perfil, Maven sigue pudiendo utilizar Maven Central por defecto.
 
 Finalmente, he utilizado `help:effective-settings` para comprobar la configuración efectiva de Maven y entender mejor cómo se combinan las diferentes configuraciones.
+
+# 09. Repositorios privados, mirrors y proxy
+
+## Objetivo
+
+El objetivo de esta práctica es aprender a configurar Maven para trabajar con un repositorio privado, como Nexus o Artifactory, utilizando un mirror y credenciales mediante variables de entorno.
+
+También se comprueba cómo Maven intenta acceder al repositorio configurado y cómo se puede diagnosticar un problema de conexión.
+
+## 1. Configuración del repositorio privado
+
+Se ha creado el archivo `config/settings-empresa.xml` para configurar el repositorio privado.
+
+En este archivo se ha definido:
+
+- Un servidor con el identificador `empresa`.
+- El usuario mediante la variable de entorno `MAVEN_REPO_USER`.
+- El token mediante la variable de entorno `MAVEN_REPO_TOKEN`.
+- Un mirror con el identificador `empresa`.
+- `mirrorOf` con el valor `*`, para indicar que todas las peticiones de repositorios deben pasar por este mirror.
+
+La URL utilizada es una URL de ejemplo de Nexus:
+
+    https://repo.empresa.example/repository/maven-public/
+
+
+## 2. Protección del archivo de configuración
+
+Como `settings-empresa.xml` contiene información relacionada con la configuración de acceso al repositorio privado, se ha añadido al archivo `.gitignore`.
+
+El `.gitignore` contiene:
+
+    config/settings-empresa.xml
+    target/
+
+De esta forma, `settings-empresa.xml` no se subirá al repositorio de GitHub.
+
+
+## 3. Comprobación de Git
+
+Se ha utilizado el siguiente comando:
+
+    git status --short --ignored
+
+El resultado muestra que `config/settings-empresa.xml` aparece como archivo ignorado:
+
+    !! config/settings-empresa.xml
+
+Esto confirma que Git está ignorando correctamente el archivo.
+
+
+## 4. Prueba de Maven
+
+Para comprobar la configuración se ha ejecutado:
+
+    mvn -s config/settings-empresa.xml help:effective-settings
+
+Maven ha intentado utilizar el mirror configurado con el identificador `empresa`.
+
+En la salida se puede observar que Maven intenta descargar los plugins desde:
+
+    https://repo.empresa.example/repository/maven-public/
+
+Aquí captura.
+
+## 5. Resultado de la prueba
+
+La ejecución termina con `BUILD FAILURE` porque la dirección `repo.empresa.example` utilizada en la práctica es una dirección de ejemplo y no corresponde a un repositorio Nexus real disponible.
+
+Por este motivo, Maven no puede descargar los plugins necesarios desde el mirror.
+
+Esto permite comprobar que la configuración del mirror está siendo utilizada correctamente, aunque la conexión con un repositorio privado real queda pendiente.
+
+![](img/09failure.png)
+
+## 6. Conclusión
+
+En esta práctica he aprendido a configurar Maven para utilizar un repositorio privado mediante un mirror.
+
+También he aprendido a utilizar variables de entorno para no guardar directamente las credenciales en los archivos del proyecto y a utilizar `.gitignore` para evitar subir la configuración privada a GitHub.
+
+Además, he comprobado cómo Maven intenta acceder al mirror configurado y cómo identificar un problema de conexión con el repositorio.
+
+# 10. Profiles: activar configuraciones de Maven
+
+## Objetivo
+
+El objetivo de esta práctica es aprender a utilizar los perfiles de Maven para activar diferentes configuraciones del proyecto sin tener que duplicarlo.
+
+Se han creado dos perfiles:
+
+- `distribucion`, para generar un JAR con las dependencias incluidas.
+- `informe`, para activar los avisos del compilador.
+
+## 1. Perfil `distribucion`
+
+Se ha creado el perfil `distribucion` dentro del archivo `pom.xml`.
+
+Este perfil utiliza el plugin `maven-shade-plugin` para generar un JAR que incluye las dependencias necesarias para ejecutar la aplicación.
+
+La clase principal utilizada es:
+
+    com.codelearn.tareas.Main
+
+Para activar el perfil se utiliza:
+
+    mvn -Pdistribucion clean package
+
+El proceso termina correctamente con `BUILD SUCCESS` y genera el archivo:
+
+    target/gestor-tareas-1.0.0-SNAPSHOT-all.jar
+
+![](img/10distribucion.png)
+
+## 2. Ejecución del JAR
+
+Una vez generado el JAR de distribución, se puede ejecutar directamente con:
+
+    java -jar target/gestor-tareas-1.0.0-SNAPSHOT-all.jar
+
+La aplicación se ejecuta correctamente y muestra un resultado en formato JSON:
+
+    {"completada":false,"titulo":"Aprender JAVA"}
+
+![](img/10ejecucion-jar.png)
+
+## 3. Perfil `informe`
+
+Se ha creado el perfil `informe` para activar los avisos del compilador.
+
+La propiedad utilizada es:
+
+    maven.compiler.showWarnings=true
+
+Además, se ha configurado una activación automática mediante una propiedad:
+
+    <activation>
+        <property>
+            <name>informe</name>
+            <value>true</value>
+        </property>
+    </activation>
+
+De esta forma, el perfil se puede activar mediante:
+
+    mvn -Dinforme=true help:active-profiles
+
+El resultado muestra que el perfil `informe` está activo.
+
+![](img/10activacion.png)
+
+## 4. Activación de varios perfiles
+
+Se ha comprobado que es posible activar los dos perfiles al mismo tiempo utilizando:
+
+    mvn -Pdistribucion,informe clean verify
+
+El proceso termina correctamente con `BUILD SUCCESS`.
+
+![](img/10dos-perfiles.png)
+
+## 5. Comprobación del perfil `distribucion`
+
+Para comprobar que el perfil `distribucion` está activo se ha utilizado:
+
+    mvn -Pdistribucion help:active-profiles
+
+El resultado muestra el perfil `distribucion` como perfil activo.
+
+
+## 6. Comprobación del POM efectivo
+
+También se ha utilizado el comando:
+
+    mvn -Pdistribucion help:effective-pom
+
+Este comando permite consultar el POM efectivo del proyecto.
+
+En el resultado se puede comprobar que la configuración del perfil `distribucion`, incluyendo el plugin `maven-shade-plugin`, está aplicada.
+
+![](img/10pom.png)
+
+## Conclusión
+
+En esta práctica he aprendido a crear y utilizar perfiles de Maven para aplicar diferentes configuraciones al proyecto.
+
+También he aprendido a activar perfiles manualmente mediante `-P`, activarlos automáticamente mediante propiedades con `-D`, generar un JAR con sus dependencias y comprobar los perfiles activos mediante las herramientas de ayuda de Maven.
