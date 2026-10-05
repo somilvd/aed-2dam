@@ -1,6 +1,7 @@
 package es.codelearnacademy.filelab.repository;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,27 +9,90 @@ public abstract class AbstractFileRepository<T, ID> implements IRepository<T, ID
 
     @Override
     public List<T> findAll() {
-        throw new UnsupportedOperationException("Función no implementada");
+        try {
+            return readAll();
+        } catch (IOException e) {
+            return List.of();
+        }
     }
 
     @Override
     public Optional<T> findById(ID id) {
-        throw new UnsupportedOperationException("Función no implementada");
+        try {
+            for (T entity : readAll()){
+                if (getId(entity).equals(id)) {
+                    return Optional.of(entity);
+                }
+            }
+        } catch (IOException e) {
+
+        }
+        return Optional.empty();
     }
 
     @Override
     public boolean create(T entity) {
-        throw new UnsupportedOperationException("Función no implementada");
+        try {
+            List<T> entidades = readAll();
+            List<T> listaActualizada = new ArrayList<>(entidades);
+            ID idObjetivo = getId(entity);
+
+            for (T entidadExistente : listaActualizada) {
+                if (getId(entidadExistente).equals(idObjetivo)) {
+                    return false;
+                }
+            }
+            listaActualizada.add(entity);
+
+            writeAll(listaActualizada);
+            return true;
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     @Override
     public boolean update(T entity) {
-        throw new UnsupportedOperationException("Función no implementada");
+        if (entity == null || getId(entity) == null) {
+            return false;
+        }
+        try {
+            List<T> entidades = readAll();
+            for (int i = 0; i < entidades.size(); i++) {
+                if (getId(entidades.get(i)) == getId(entity)) {
+                    entidades.set(i, entity);
+                    writeAll(entidades);
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
+        return false;
     }
 
     @Override
     public boolean delete(ID id) {
-        throw new UnsupportedOperationException("Función no implementada");
+        if (id == null) {
+            return false;
+        }
+        try {
+            List<T> entidades = new ArrayList<>(readAll());
+
+            for (int i = 0; i < entidades.size(); i++) {
+                T entidad = entidades.get(i);
+
+                if (getId(entidad) != null && getId(entidad).equals(id)) {
+                    entidades.remove(i);
+                    writeAll(entidades);
+                    return true;
+                }
+            }
+        } catch (IOException e) {
+            return false;
+        }
+        return false;
+
     }
 
     protected abstract ID getId(T entity);
