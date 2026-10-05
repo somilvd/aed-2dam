@@ -5,6 +5,7 @@ import es.codelearnacademy.filelab.model.Producto;
 import es.codelearnacademy.filelab.repository.AbstractFileRepository;
 import es.codelearnacademy.filelab.repository.IProductoRepository;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -36,6 +37,20 @@ public class ProductoJsonRepository
 
     @Override
     protected void writeAll(List<Producto> productos) throws IOException {
-        throw new UnsupportedOperationException("Función no implementada");
+        Path temporal = null;
+        try {
+            Path destino = path.toAbsolutePath();
+            Path directorio = destino.getParent();
+            Files.createDirectories(directorio);
+            temporal = Files.createTempFile(directorio, "productos-", ".json.temp");
+            mapper.writerWithDefaultPrettyPrinter().writeValue(temporal.toFile(), productos);
+            try {
+                Files.move(temporal, destino);
+            } catch (IOException e) {
+
+            }
+        } catch (IOException e) {
+
+        }
     }
 }
