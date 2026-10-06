@@ -6,6 +6,14 @@ public enum FileFormat {
     XML;
 
     public static FileFormat from(String value) {
-        throw new UnsupportedOperationException("Función no implementada");
+        if (value == null) {
+            throw new IllegalArgumentException();
+        }
+        for (FileFormat formato : FileFormat.values()) {
+            if (formato.name().equalsIgnoreCase(value)) {
+                return formato;
+            }
+        }
+        throw new IllegalArgumentException();
     }
 }

@@ -7,6 +7,7 @@ import es.codelearnacademy.filelab.repository.IProductoRepository;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductoJsonRepository
@@ -27,30 +28,31 @@ public class ProductoJsonRepository
 
     @Override
     protected Long getId(Producto producto) {
-        throw new UnsupportedOperationException("Función no implementada");
+        return producto.id();
     }
 
     @Override
     protected List<Producto> readAll() throws IOException {
-        throw new UnsupportedOperationException("Función no implementada");
+        if (!Files.exists(path)) {
+            return List.of();
+        }
+        Producto[] productos = mapper.readValue(path.toFile(), Producto[].class);
+
+        return new ArrayList<>(List.of(productos));
     }
 
     @Override
     protected void writeAll(List<Producto> productos) throws IOException {
-        Path temporal = null;
+        Path destino = path.toAbsolutePath();
+        Path directorio = destino.getParent();
+        Files.createDirectories(directorio);
+
+        Path temporal = Files.createTempFile(directorio, "productos-", ".json.temp" );
         try {
-            Path destino = path.toAbsolutePath();
-            Path directorio = destino.getParent();
-            Files.createDirectories(directorio);
-            temporal = Files.createTempFile(directorio, "productos-", ".json.temp");
             mapper.writerWithDefaultPrettyPrinter().writeValue(temporal.toFile(), productos);
-            try {
-                Files.move(temporal, destino);
-            } catch (IOException e) {
-
-            }
-        } catch (IOException e) {
-
+            Files.move(temporal, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING );
+        } finally {
+            Files.deleteIfExists(temporal);
         }
     }
 }
