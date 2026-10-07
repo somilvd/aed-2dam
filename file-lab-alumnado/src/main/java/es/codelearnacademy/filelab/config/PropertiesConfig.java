@@ -1,8 +1,9 @@
 package es.codelearnacademy.filelab.config;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
@@ -19,106 +20,66 @@ public class PropertiesConfig {
     }
 
     public Optional<String> get(String key) {
-        if (key == null || key.isBlank()) {
-            return Optional.empty();
-        }
-
         try {
-            Properties propiedades = new Properties();
-
-            InputStream entrada = Files.newInputStream(path);
-            propiedades.load(entrada);
-            entrada.close();
-
-            String valor = propiedades.getProperty(key);
-
-            if (valor == null) {
-                return Optional.empty();
-            }
-
-            return Optional.of(valor);
-
+            Properties properties = cargar();
+            return Optional.ofNullable(properties.getProperty(key));
         } catch (IOException e) {
             return Optional.empty();
         }
     }
 
     public String getOrDefault(String key, String defaultValue) {
-        Optional<String> valor = get(key);
-
-        if (valor.isPresent()) {
-            return valor.get();
-        }
-
-        return defaultValue;
+        return get(key).orElse(defaultValue);
     }
 
     public Map<String, String> findAll() {
         try {
-            Properties propiedades = new Properties();
-            try (InputStream entrada = Files.newInputStream(path)) {
-                propiedades.load(entrada);
-            }
+            Properties properties = cargar();
             Map<String, String> resultado = new HashMap<>();
-            for (String clave : propiedades.stringPropertyNames()) {
-                resultado.put(clave, propiedades.getProperty(clave));
-            } return resultado;
+            for (String clave : properties.stringPropertyNames()) {
+                resultado.put(clave, properties.getProperty(clave));
+            }
+            return resultado;
         } catch (IOException e) {
             return Map.of();
         }
     }
 
     public boolean put(String key, String value) {
-        if (key == null || key.isBlank()) {
-            return false;
-        }
-
-        Properties propiedades = new Properties();
-
         try {
-            if (Files.exists(path)) {
-                InputStream entrada = Files.newInputStream(path);
-                propiedades.load(entrada);
-                entrada.close();
-            }
-
-            propiedades.setProperty(key, value);
-
-            OutputStream salida = Files.newOutputStream(path);
-            propiedades.store(salida, null);
-            salida.close();
-
+            Properties properties = cargar();
+            properties.setProperty(key, value);
+            guardar(properties);
             return true;
-
         } catch (IOException e) {
             return false;
         }
     }
 
     public boolean remove(String key) {
-        if (key == null || key.isBlank()) {
-            return false;
-        }
-
-        Properties propiedades = new Properties();
-
         try {
-            if (Files.exists(path)) {
-                InputStream entrada = Files.newInputStream(path);
-                propiedades.load(entrada);
-                entrada.close();
-            }
-
-            propiedades.remove(key);
-
-            OutputStream salida = Files.newOutputStream(path);
-            propiedades.store(salida, null);
-            salida.close();
-
+            Properties properties = cargar();
+            properties.remove(key);
+            guardar(properties);
             return true;
-
         } catch (IOException e) {
             return false;
+        }
+    }
+
+    private Properties cargar() throws IOException {
+        Properties properties = new Properties();
+        if (Files.exists(path)) {
+            try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+                properties.load(reader);
+            }
+        }
+        return properties;
+    }
+
+    private void guardar(Properties properties) throws IOException {
+        try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8)) {
+            properties.store(writer, null);
         }
     }
 }

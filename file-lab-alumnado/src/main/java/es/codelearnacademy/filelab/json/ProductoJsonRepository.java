@@ -1,5 +1,6 @@
 package es.codelearnacademy.filelab.json;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import es.codelearnacademy.filelab.model.Producto;
 import es.codelearnacademy.filelab.repository.AbstractFileRepository;
@@ -36,23 +37,11 @@ public class ProductoJsonRepository
         if (!Files.exists(path)) {
             return List.of();
         }
-        Producto[] productos = mapper.readValue(path.toFile(), Producto[].class);
-
-        return new ArrayList<>(List.of(productos));
+        return mapper.readValue(path.toFile(), new TypeReference<List<Producto>>() {});
     }
 
     @Override
     protected void writeAll(List<Producto> productos) throws IOException {
-        Path destino = path.toAbsolutePath();
-        Path directorio = destino.getParent();
-        Files.createDirectories(directorio);
-
-        Path temporal = Files.createTempFile(directorio, "productos-", ".json.temp" );
-        try {
-            mapper.writerWithDefaultPrettyPrinter().writeValue(temporal.toFile(), productos);
-            Files.move(temporal, destino, java.nio.file.StandardCopyOption.REPLACE_EXISTING );
-        } finally {
-            Files.deleteIfExists(temporal);
-        }
+        mapper.writeValue(path.toFile(), productos);
     }
 }

@@ -5,7 +5,9 @@ import es.codelearnacademy.filelab.model.Producto;
 import es.codelearnacademy.filelab.repository.AbstractFileRepository;
 import es.codelearnacademy.filelab.repository.IProductoRepository;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class ProductoXmlRepository
@@ -31,6 +33,9 @@ public class ProductoXmlRepository
 
     @Override
     protected List<Producto> readAll() throws IOException {
+        if (!Files.exists(path)) {
+            return new ArrayList<>();
+        }
         DocumentoProductos documento = mapper.readValue(path.toFile(), DocumentoProductos.class);
         return documento.getProductos();
     }

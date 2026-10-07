@@ -4,7 +4,16 @@ import es.codelearnacademy.filelab.model.Producto;
 import es.codelearnacademy.filelab.model.Vehiculo;
 import es.codelearnacademy.filelab.repository.AbstractFileRepository;
 import es.codelearnacademy.filelab.repository.IVehiculoRepository;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVPrinter;
+import org.apache.commons.csv.CSVRecord;
+
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -15,6 +24,15 @@ public class VehiculoCsvRepository
         implements IVehiculoRepository {
 
     private final Path path;
+
+    private final CSVFormat inputFormat = CSVFormat.DEFAULT.builder()
+            .setHeader()
+            .setSkipHeaderRecord(true)
+            .get();
+
+    private final CSVFormat outputFormat = CSVFormat.DEFAULT.builder()
+            .setHeader("id", "nombre", "precio", "stock")
+            .get();
 
     public VehiculoCsvRepository(Path path) {
         this.path = path;
@@ -28,22 +46,20 @@ public class VehiculoCsvRepository
     @Override
     protected List<Vehiculo> readAll() throws IOException {
         List<Vehiculo> vehiculos = new ArrayList<>();
-        if (!Files.exists(path) || Files.size(path) == 0) {
+        if (Files.exists(path)) {
             return vehiculos;
         }
 
-        List<String> lineas = Files.readAllLines(path);
+        try (Reader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8);
+             CSVParser parser = inputFormat.parse(reader)) {
 
-        for (int i = 1; i < lineas.size(); i++) {
-            String linea = lineas.get(i);
-            String[] datos = linea.split(",");
-
-            String matricula = datos[0].trim();
-            String marca = datos[1].trim();
-            String modelo = datos[2].trim();
-            int anio = Integer.parseInt(datos[3].trim());
-
-            vehiculos.add(new Vehiculo(matricula, marca, modelo, anio));
+            for (CSVRecord fila : parser) {
+                vehiculos.add(new Vehiculo(
+                        fila.get("matricula"),
+                        fila.get("marca"),
+                        fila.get("modelo"),
+                        Integer.parseInt(fila.get("anio"))));
+            }
 
         }
         return vehiculos;
@@ -51,12 +67,11 @@ public class VehiculoCsvRepository
 
     @Override
     protected void writeAll(List<Vehiculo> vehiculos) throws IOException {
-        List<String> lineas = new ArrayList<>();
-        lineas.add("matricula,marca,modelo,anio");
-
-        for (Vehiculo vehiculo : vehiculos) {
-            lineas.add(vehiculo.matricula() + "," + vehiculo.marca() + "," + vehiculo.modelo() + "," +vehiculo.anio());
+        try (Writer writer = Files.newBufferedWriter(path, StandardCharsets.UTF_8);
+             CSVPrinter printer = new CSVPrinter(writer, outputFormat)) {
+            for (Vehiculo vehiculo : vehiculos) {
+                printer.printRecord(vehiculo.matricula(), vehiculo.marca(), vehiculo.modelo(), vehiculo.anio());
+            }
         }
-        Files.write(path, lineas);
     }
 }
