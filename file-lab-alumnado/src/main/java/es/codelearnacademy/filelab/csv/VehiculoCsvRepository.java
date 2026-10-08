@@ -46,7 +46,8 @@ public class VehiculoCsvRepository
     @Override
     protected List<Vehiculo> readAll() throws IOException {
         List<Vehiculo> vehiculos = new ArrayList<>();
-        if (Files.exists(path)) {
+
+        if (!Files.exists(path)) {
             return vehiculos;
         }
 
@@ -60,7 +61,6 @@ public class VehiculoCsvRepository
                         fila.get("modelo"),
                         Integer.parseInt(fila.get("anio"))));
             }
-
         }
         return vehiculos;
     }

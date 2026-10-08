@@ -19,32 +19,31 @@ public abstract class AbstractFileRepository<T, ID> implements IRepository<T, ID
     @Override
     public Optional<T> findById(ID id) {
         try {
-            for (T entity : readAll()){
-                if (getId(entity).equals(id)) {
-                    return Optional.of(entity);
+            for (T entidad : readAll()){
+                if (getId(entidad).equals(id)) {
+                    return Optional.of(entidad);
                 }
             }
+            return Optional.empty();
         } catch (IOException e) {
-
+            return Optional.empty();
         }
-        return Optional.empty();
     }
 
     @Override
     public boolean create(T entity) {
+        if (entity == null) {
+            return false;
+        }
         try {
-            List<T> entidades = readAll();
-            List<T> listaActualizada = new ArrayList<>(entidades);
-            ID idObjetivo = getId(entity);
-
-            for (T entidadExistente : listaActualizada) {
-                if (getId(entidadExistente).equals(idObjetivo)) {
+            List<T> entidades = new ArrayList<>(readAll());
+            for (T entidad : entidades) {
+                if (getId(entidad).equals(getId(entity))) {
                     return false;
                 }
             }
-            listaActualizada.add(entity);
-
-            writeAll(listaActualizada);
+            entidades.add(entity);
+            writeAll(entidades);
             return true;
         } catch (IOException e) {
             return false;
@@ -59,16 +58,16 @@ public abstract class AbstractFileRepository<T, ID> implements IRepository<T, ID
         try {
             List<T> entidades = readAll();
             for (int i = 0; i < entidades.size(); i++) {
-                if (getId(entidades.get(i)) == getId(entity)) {
+                if (getId(entidades.get(i)).equals(getId(entity))) {
                     entidades.set(i, entity);
                     writeAll(entidades);
                     return true;
                 }
             }
+            return false;
         } catch (IOException e) {
             return false;
         }
-        return false;
     }
 
     @Override
@@ -82,7 +81,7 @@ public abstract class AbstractFileRepository<T, ID> implements IRepository<T, ID
             for (int i = 0; i < entidades.size(); i++) {
                 T entidad = entidades.get(i);
 
-                if (getId(entidad) != null && getId(entidad).equals(id)) {
+                if (getId(entidades.get(i)).equals(id)) {
                     entidades.remove(i);
                     writeAll(entidades);
                     return true;

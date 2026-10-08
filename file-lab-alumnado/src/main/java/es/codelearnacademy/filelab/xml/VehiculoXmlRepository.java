@@ -5,7 +5,9 @@ import es.codelearnacademy.filelab.model.Vehiculo;
 import es.codelearnacademy.filelab.repository.AbstractFileRepository;
 import es.codelearnacademy.filelab.repository.IVehiculoRepository;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 
 public class VehiculoXmlRepository
@@ -26,6 +28,9 @@ public class VehiculoXmlRepository
 
     @Override
     protected List<Vehiculo> readAll() throws IOException {
+        if (!Files.exists(path)) {
+            return new ArrayList<>();
+        }
         DocumentoVehiculos documento = mapper.readValue(path.toFile(), DocumentoVehiculos.class);
         return documento.getVehiculos();
     }
