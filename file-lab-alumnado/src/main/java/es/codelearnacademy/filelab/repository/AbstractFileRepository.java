@@ -79,8 +79,6 @@ public abstract class AbstractFileRepository<T, ID> implements IRepository<T, ID
             List<T> entidades = new ArrayList<>(readAll());
 
             for (int i = 0; i < entidades.size(); i++) {
-                T entidad = entidades.get(i);
-
                 if (getId(entidades.get(i)).equals(id)) {
                     entidades.remove(i);
                     writeAll(entidades);
