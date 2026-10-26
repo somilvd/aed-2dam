@@ -34,50 +34,140 @@ public final class ConsultaDao extends AbstractDao<Consulta> implements IConsult
 
     @Override
     public List<Consulta> listar() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listar'");
+        String sql = "SELECT id, id_mascota, id_veterinario, fecha, horas, estado FROM consultas";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            return consultar(ps);
+        } catch (SQLException e) {
+            throw new DaoException("Listar consultas ha fallado", e);
+        }
     }
 
     @Override
     public Optional<Consulta> buscarPorId(Integer id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'buscarPorId'");
+        if (id == null) {
+            return Optional.empty();
+        }
+        String sql = "SELECT id, id_mascota, id_veterinario, fecha, horas, estado FROM consultas WHERE id = ?";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            return consultarUno(ps);
+        } catch (SQLException e) {
+            throw new DaoException("Buscar consultas por su id ha fallado", e);
+        }
     }
 
     @Override
     public int insertar(Consulta entidad) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'insertar'");
+        if (entidad == null) {
+            return 0;
+        }
+        String sql = "INSERT INTO consultas (id_mascota, id_veterinario, fecha, horas, estado) VALUES (?,?,?,?,?)";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, entidad.getIdMascota());
+            ps.setInt(2, entidad.getIdVeterinario());
+            ps.setString(3, entidad.getFecha());
+            ps.setBigDecimal(4, entidad.getHoras());
+            ps.setString(5, entidad.getEstado());
+
+            int filas = ps.executeUpdate();
+
+            if (filas == 0) {
+                return 0;
+            }
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Insertar consultas ha fallado", e);
+        }
     }
 
     @Override
     public int actualizar(Consulta entidad) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'actualizar'");
+        if (entidad == null) {
+            return 0;
+        }
+        String sql = "UPDATE consultas SET id_mascota = ?, id_veterinario = ?, fecha = ?, horas = ?, estado = ? WHERE id = ?";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, entidad.getIdMascota());
+            ps.setInt(2, entidad.getIdVeterinario());
+            ps.setString(3, entidad.getFecha());
+            ps.setBigDecimal(4, entidad.getHoras());
+            ps.setString(5, entidad.getEstado());
+            ps.setInt(6, entidad.getId());
+
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DaoException("Insertar consultas ha fallado", e);
+        }
     }
 
     @Override
     public int eliminar(Integer id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'eliminar'");
+        if (id == null) {
+            return 0;
+        }
+        String sql = "DELETE FROM consultas WHERE id = ?";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DaoException("Eliminar consultas ha fallado", e);
+        }
     }
 
     @Override
     public List<Consulta> buscarPorMascota(Integer idMascota) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'buscarPorMascota'");
+        if (idMascota == null) {
+            return List.of();
+        }
+        String sql = "SELECT id, id_mascota, id_veterinario, fecha, horas, estado FROM consultas WHERE id_mascota = ?";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, idMascota);
+            return consultar(ps);
+        } catch (SQLException e) {
+            throw new DaoException("Buscar consultas por su id ha fallado", e);
+        }
     }
 
     @Override
     public List<Consulta> buscarPorVeterinario(Integer idVeterinario) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'buscarPorVeterinario'");
+        if (idVeterinario == null) {
+            return List.of();
+        }
+        String sql = "SELECT id, id_mascota, id_veterinario, fecha, horas, estado FROM consultas WHERE id_veterinario = ?";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, idVeterinario);
+            return consultar(ps);
+        } catch (SQLException e) {
+            throw new DaoException("Buscar consultas por su id ha fallado", e);
+        }
     }
 
     @Override
     public List<Consulta> listarProgramadas() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listarProgramadas'");
+        String sql = "SELECT id, id_mascota, id_veterinario, fecha, horas, estado FROM consultas WHERE estado LIKE 'PROGRAMADA'";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            return consultar(ps);
+        } catch (SQLException e) {
+            throw new DaoException("Buscar consultas por su id ha fallado", e);
+        }
     }
 
 }
