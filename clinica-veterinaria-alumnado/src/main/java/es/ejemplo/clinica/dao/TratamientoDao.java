@@ -32,38 +32,110 @@ public final class TratamientoDao extends AbstractDao<Tratamiento> implements IT
 
     @Override
     public List<Tratamiento> listar() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listar'");
+        String sql = "SELECT id, id_consulta, descripcion, cantidad, precio_unitario FROM tratamientos";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            return consultar(ps);
+        } catch (SQLException e) {
+            throw new DaoException("Listar tratamientos ha fallado", e);
+        }
     }
 
     @Override
     public Optional<Tratamiento> buscarPorId(Integer id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'buscarPorId'");
+        if (id == null) {
+            return Optional.empty();
+        }
+        String sql = "SELECT id, id_consulta, descripcion, cantidad, precio_unitario FROM tratamientos WHERE id = ?";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            return consultarUno(ps);
+        } catch (SQLException e) {
+            throw new DaoException("Buscar tratamientos por su id ha fallado", e);
+        }
     }
 
     @Override
     public int insertar(Tratamiento entidad) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'insertar'");
+        if (entidad == null) {
+            return 0;
+        }
+        String sql = "INSERT INTO tratamientos (id_consulta, descripcion, cantidad, precio_unitario) VALUES (?,?,?,?)";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            ps.setInt(1, entidad.getIdConsulta());
+            ps.setString(2, entidad.getDescripcion());
+            ps.setInt(3, entidad.getCantidad());
+            ps.setBigDecimal(4, entidad.getPrecioUnitario());
+
+            int filas = ps.executeUpdate();
+
+            if (filas == 0) {
+                return 0;
+            }
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                return rs.next() ? rs.getInt(1) : 0;
+            }
+        } catch (SQLException e) {
+            throw new DaoException("Insertar tratamientos ha fallado", e);
+        }
     }
 
     @Override
     public int actualizar(Tratamiento entidad) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'actualizar'");
+        if (entidad == null) {
+            return 0;
+        }
+        String sql = "UPDATE tratamientos SET id_consulta = ?, descripcion = ?, cantidad = ?, precio_unitario = ? WHERE id = ?";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, entidad.getIdConsulta());
+            ps.setString(2, entidad.getDescripcion());
+            ps.setInt(3, entidad.getCantidad());
+            ps.setBigDecimal(4, entidad.getPrecioUnitario());
+            ps.setInt(5, entidad.getId());
+
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DaoException("Insertar tratamientos ha fallado", e);
+        }
     }
 
     @Override
     public int eliminar(Integer id) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'eliminar'");
+        if (id == null) {
+            return 0;
+        }
+        String sql = "DELETE FROM tratamientos WHERE id = ?";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, id);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new DaoException("Eliminar tratamientos por su id ha fallado", e);
+        }
     }
 
     @Override
     public List<Tratamiento> listarPorConsulta(Integer idConsulta) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'listarPorConsulta'");
+        if (idConsulta == null) {
+            return List.of();
+        }
+        String sql = "SELECT id, id_consulta, descripcion, cantidad, precio_unitario FROM tratamientos WHERE id_consulta = ?";
+
+        try (Connection connection = abrirConexion(url)) {
+            PreparedStatement ps = connection.prepareStatement(sql);
+            ps.setInt(1, idConsulta);
+            return consultar(ps);
+        } catch (SQLException e) {
+            throw new DaoException("Buscar tratamientos por id de consulta ha fallado", e);
+        }
     }
 
     @Override
