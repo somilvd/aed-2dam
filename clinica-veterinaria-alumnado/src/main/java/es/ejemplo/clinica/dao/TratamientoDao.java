@@ -8,7 +8,7 @@
 
     public final class TratamientoDao extends AbstractDao<Tratamiento> implements ITratamientoDao {
 
-        private String url;
+        private final String url;
         public TratamientoDao(String url) {
             super(url);
             this.url = url;
@@ -66,7 +66,7 @@
             String sql = "INSERT INTO tratamientos (id_consulta, descripcion, cantidad, precio_unitario) VALUES (?,?,?,?)";
 
             try (Connection connection = abrirConexion(url)) {
-                PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+                PreparedStatement ps = connection.prepareStatement(sql);
                 ps.setInt(1, entidad.getIdConsulta());
                 ps.setString(2, entidad.getDescripcion());
                 ps.setInt(3, entidad.getCantidad());

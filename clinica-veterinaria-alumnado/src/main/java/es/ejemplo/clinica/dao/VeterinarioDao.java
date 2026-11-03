@@ -7,11 +7,10 @@ import java.util.*;
 
 public final class VeterinarioDao extends AbstractDao<Veterinario> implements IVeterinarioDao {
 
-    private String url;
+    private final String url;
     public VeterinarioDao(String url) {
         super(url);
         this.url = url;
-
     }
 
     @Override
@@ -64,7 +63,7 @@ public final class VeterinarioDao extends AbstractDao<Veterinario> implements IV
         String sql = "INSERT INTO veterinarios (nombre, especialidad, tarifa_hora) VALUES (?,?,?)";
 
         try (Connection connection = abrirConexion(url)) {
-            PreparedStatement ps = connection.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement ps = connection.prepareStatement(sql);
             ps.setString(1, entidad.getNombre());
             ps.setString(2, entidad.getEspecialidad());
             ps.setBigDecimal(3, entidad.getTarifaHora());

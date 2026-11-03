@@ -3,21 +3,41 @@ package es.ejemplo.clinica.dao;
 import es.ejemplo.clinica.infra.ConexionDB;
 
 import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.sql.*;
+import java.util.*;
 
-public abstract class AbstractDao<T> extends ConexionDB implements IAbstractDao<T> {
+public abstract class AbstractDao<T> implements IAbstractDao<T> {
 
 
+    private final String url;
     public AbstractDao(String url) {
-        super(url);
+        this.url = url;
     }
 
     protected abstract Optional<T> mapToClass(ResultSet rs);
+
+    public static Connection abrirConexion(String url) {
+        try {
+            if (url == null || !url.startsWith("jdbc:sqlite:"))
+                throw new IllegalArgumentException("URL SQLite no válida");
+            String ruta = url.substring("jdbc:sqlite:".length());
+            if (!ruta.equals(":memory:") && !ruta.startsWith("file:") && !Files.isRegularFile(Path.of(ruta)))
+                throw new IllegalArgumentException("La base de datos no existe: " + ruta);
+            Connection cn = DriverManager.getConnection(url);
+            try (Statement st = cn.createStatement()) {
+                st.execute("PRAGMA foreign_keys = ON");
+            } catch (SQLException e) {
+                cn.close();
+                throw e;
+            }
+            return cn;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
 
     @Override
     public List<T> consultar(PreparedStatement ps) {
@@ -75,4 +95,16 @@ public abstract class AbstractDao<T> extends ConexionDB implements IAbstractDao<
             throw new DaoException("Consultar Entero ha fallado", e);
         }
     }
+
+    protected Map<String, Integer> consultarAgrupado(PreparedStatement ps) {
+        if (ps == null) return Map.of();
+        try (ResultSet rs = ps.executeQuery()) {
+            Map<String, Integer> mapa = new LinkedHashMap<>();
+            while (rs.next()) mapa.put(rs.getString(1), rs.getInt(2));
+            return mapa;
+        } catch (SQLException | RuntimeException e) {
+            throw new  DaoException("consultarAgrupado", e);
+        }
+    }
+
 }
