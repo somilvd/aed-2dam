@@ -1,0 +1,14 @@
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/DocumentoTareas.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/TareasApplication.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/controller/TareaControllerCsv.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/controller/TareaControllerJson.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/modelo/Tarea.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/repository/ITareaRepository.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/repository/TareaRepository.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/repository/TareaRepositoryCsv.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/repository/TareaRepositoryJson.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/repository/TareaRepositoryXml.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/service/ITareaService.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/service/TareaServiceCsv.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/service/TareaServiceJson.java
+/home/alumno/Documentos/api-tareas/src/main/java/aula/tareas/service/TareaServiceXml.java
