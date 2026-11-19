@@ -1,7 +1,6 @@
 package aula.tareas.repository;
 
-import aula.tareas.DocumentoTareas;
-import aula.tareas.modelo.Tarea;
+import aula.tareas.api.TareaRequest;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.stereotype.Repository;
@@ -19,7 +18,7 @@ public class TareaRepositoryJson implements ITareaRepository{
     private Path path;
     private ObjectMapper mapper;
     private final String url = "data/tarea.json";
-    private List<Tarea> lista;
+    private List<TareaRequest> lista;
 
     public TareaRepositoryJson() {
         //path = Path.of("data", "tarea.json");
@@ -49,9 +48,9 @@ public class TareaRepositoryJson implements ITareaRepository{
     }
 
     @Override
-    public Tarea create(String titulo) {
+    public TareaRequest create(String titulo) {
         long id = secuencia.incrementAndGet();
-        var tarea = new Tarea(id, titulo.strip());
+        var tarea = new TareaRequest(id, titulo.strip());
         lista.add(tarea);
         saveAll(lista);
         return tarea;
@@ -59,7 +58,7 @@ public class TareaRepositoryJson implements ITareaRepository{
 
     @Override
     public boolean delete(long identificador) {
-        List<Tarea> items = findAll();
+        List<TareaRequest> items = findAll();
         boolean removed = items.removeIf(t -> t.id() == identificador);
         if (removed) {
             saveAll(items);
@@ -68,28 +67,28 @@ public class TareaRepositoryJson implements ITareaRepository{
     }
 
     @Override
-    public List<Tarea> findAll() {
+    public List<TareaRequest> findAll() {
        return List.copyOf(lista);
     }
 
     @Override
-    public Tarea findById(long identificador) {
+    public TareaRequest findById(long identificador) {
         return findAll().stream().filter(t -> t.id() == identificador).findFirst().orElse(null);
     }
 
     @Override
-    public Tarea update(Tarea tarea) {
-        List<Tarea> items = findAll();
+    public TareaRequest update(TareaRequest tareaRequest) {
+        List<TareaRequest> items = findAll();
         for (int i = 0; i < items.size(); i++) {
-            if (items.get(i).id() == tarea.id()) {
-                items.set(i, tarea);
+            if (items.get(i).id() == tareaRequest.id()) {
+                items.set(i, tareaRequest);
                 saveAll(items);
             }
         }
         return null;
     }
 
-    private void saveAll(List<Tarea> items) {
+    private void saveAll(List<TareaRequest> items) {
         try {
             Path parent = path.getParent();
             if (parent != null) {
@@ -102,10 +101,10 @@ public class TareaRepositoryJson implements ITareaRepository{
 
     }
 
-    public List<Tarea> getAll() {
+    public List<TareaRequest> getAll() {
         try {
             return new ArrayList<>(mapper.readValue(
-                    path.toFile(), new TypeReference<List<Tarea>>() {}));
+                    path.toFile(), new TypeReference<List<TareaRequest>>() {}));
         }catch (Exception exception) {
             //Logger
             return new ArrayList<>();

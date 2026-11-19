@@ -1,13 +1,13 @@
 package aula.tareas;
 
-import aula.tareas.modelo.Tarea;
+import aula.tareas.api.TareaRequest;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public record DocumentoTareas(List<Tarea> tareas) {
+public record DocumentoTareas(List<TareaRequest> tareaRequests) {
 
-    public DocumentoTareas(List<Tarea> tareas) {
-        this.tareas = new ArrayList<>(tareas);
+    public DocumentoTareas(List<TareaRequest> tareaRequests) {
+        this.tareaRequests = new ArrayList<>(tareaRequests);
     }
 }

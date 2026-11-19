@@ -1,6 +1,6 @@
 package aula.tareas.service;
 
-import aula.tareas.modelo.Tarea;
+import aula.tareas.api.TareaRequest;
 import aula.tareas.repository.ITareaRepository;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -17,12 +17,12 @@ public class TareaServiceJson implements ITareaService{
     }
 
     @Override
-    public List<Tarea> listar() {
+    public List<TareaRequest> listar() {
         return tareaRepositoryJson.findAll();
     }
 
     @Override
-    public Tarea buscar(long id) {
+    public TareaRequest buscar(long id) {
         if (id < 0) {
             return null;
         }
@@ -30,7 +30,7 @@ public class TareaServiceJson implements ITareaService{
     }
 
     @Override
-    public Tarea crear(String titulo) {
+    public TareaRequest crear(String titulo) {
         return tareaRepositoryJson.create(titulo);
     }
 }
