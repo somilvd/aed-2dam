@@ -1,6 +1,6 @@
 package ies.puesto.peliculas.repository.jdbc;
 
-public class PeliculaEntity {
+class PeliculaEntity {
 
     private final String codigoFila;
     private final String tituloFila;
