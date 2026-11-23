@@ -10,6 +10,9 @@ public class TareaMapperJdbc {
     }
 
     static public TareaEntityJdbc toJdbc(TareaRequest tareaRequest) {
-        return null;
+        if(tareaRequest == null) {
+            return null;
+        }
+        return new TareaEntityJdbc(tareaRequest.id(), tareaRequest.titulo());
     }
 }
