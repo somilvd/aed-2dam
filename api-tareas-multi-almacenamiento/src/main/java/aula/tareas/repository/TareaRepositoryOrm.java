@@ -1,5 +1,6 @@
 package aula.tareas.repository;
 
+import aula.tareas.entity.TareaEntityOrm;
 import aula.tareas.modelo.Tarea;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
@@ -18,31 +19,50 @@ public class TareaRepositoryOrm implements ITareaRepository {
 
     @Override
     public List<Tarea> findAll() {
-        // TODO: Recuperar las tareas de este almacenamiento.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+
+        return jpa.findAll().stream()
+                    .map(entity -> new Tarea(entity.getIdTarea(), entity.getNombreTarea()))
+                    .toList();
+
     }
 
     @Override
     public Optional<Tarea> findById(long id) {
-        // TODO: Buscar una tarea por identificador.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+
+        return jpa.findById(id).stream().map(entity -> new Tarea(id, entity.getNombreTarea())).findFirst();
     }
 
     @Override
     public Tarea create(Tarea tarea) {
-        // TODO: Guardar la tarea nueva y devolverla con su identificador.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        TareaEntityOrm entidad = new TareaEntityOrm(
+                tarea.identificador(),
+                tarea.nombre()
+        );
+
+        TareaEntityOrm guardada = jpa.save(entidad);
+
+        return new Tarea(guardada.getIdTarea(), guardada.getNombreTarea());
     }
 
     @Override
     public Optional<Tarea> update(Tarea tarea) {
-        // TODO: Actualizar una tarea existente.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+
+        return jpa.findById(tarea.identificador())
+                .map(entity -> {
+                    entity.setNombreTarea(tarea.nombre());
+                    TareaEntityOrm actualizada = jpa.save(entity);
+                    return new Tarea(actualizada.getIdTarea(), actualizada.getNombreTarea());
+                });
+
     }
 
     @Override
     public boolean delete(long id) {
-        // TODO: Eliminar la tarea y comunicar si existía.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        if (jpa.findById(id).isEmpty()) {
+            return false;
+        }
+
+        jpa.deleteById(id);
+        return true;
     }
 }

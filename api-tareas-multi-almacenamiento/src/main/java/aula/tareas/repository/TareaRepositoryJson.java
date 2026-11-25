@@ -4,7 +4,11 @@ import aula.tareas.modelo.Tarea;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
+import tools.jackson.core.type.TypeReference;
 import tools.jackson.databind.json.JsonMapper;
+
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -27,36 +31,71 @@ public class TareaRepositoryJson implements ITareaRepository {
 
     @Override
     public synchronized List<Tarea> findAll() {
-        // TODO: Recuperar las tareas de este almacenamiento.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        if (Files.exists(path)) {
+            return List.of();
+        }
+
+        return mapper.readValue(path.toFile(), new TypeReference<List<Tarea>>() {});
     }
 
     @Override
     public synchronized Optional<Tarea> findById(long id) {
-        // TODO: Buscar una tarea por identificador.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        List<Tarea> items = findAll();
+
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).identificador() == id) {
+                return Optional.of(items.get(i));
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
     public synchronized Tarea create(Tarea tarea) {
-        // TODO: Guardar la tarea nueva y devolverla con su identificador.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+
+        List<Tarea> items = findAll();
+
+        long id = items.stream()
+                .mapToLong(Tarea::identificador)
+                .max()
+                .orElse(0) + 1;
+
+        Tarea tareaCreada = new Tarea(id, tarea.nombre());
+
+        items.add(tareaCreada);
+        saveAll(items);
+
+        return tareaCreada;
     }
 
     @Override
     public synchronized Optional<Tarea> update(Tarea tarea) {
-        // TODO: Actualizar una tarea existente.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        if (tarea == null) {
+            return Optional.empty();
+        }
+        List<Tarea> items = findAll();
+        for (int i = 0; i < items.size(); i++) {
+            if (items.get(i).identificador() == tarea.identificador()) {
+                items.set(i, tarea);
+                saveAll(items);
+                return Optional.of(tarea);
+            }
+        }
+        return Optional.empty();
     }
 
     @Override
     public synchronized boolean delete(long id) {
-        // TODO: Eliminar la tarea y comunicar si existía.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        List<Tarea> items = findAll();
+        boolean removed = items.removeIf(t -> t.identificador() == id);
+        if (removed) {
+            saveAll(items);
+        }
+        return false;
     }
 
     private void saveAll(List<Tarea> tareas) {
-        // TODO: Escribir la lista completa en el fichero.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        mapper.writeValue(path.toFile(), tareas);
     }
 }

@@ -1,10 +1,13 @@
 package aula.tareas.repository;
 
+import aula.tareas.api.TareaRequest;
 import aula.tareas.modelo.Tarea;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,31 +22,50 @@ public class TareaRepositoryJdbc implements ITareaRepository {
 
     @Override
     public List<Tarea> findAll() {
-        // TODO: Recuperar las tareas de este almacenamiento.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        String sql = "SELECT id, titulo FROM tareas_jdbc ORDER BY id";
+
+        return jdbc.query(sql, (rs, rowNum) -> new Tarea(rs.getLong("id"), rs.getString("titulo")));
     }
 
     @Override
     public Optional<Tarea> findById(long id) {
-        // TODO: Buscar una tarea por identificador.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        String sql = "SELECT id, titulo FROM tareas_jdbc WHERE id = ?";
+
+        return jdbc.query(sql, (rs, rowNum) -> new Tarea(rs.getLong("id"), rs.getString("titulo")), id)
+                .stream().findFirst();
     }
 
     @Override
     public Tarea create(Tarea tarea) {
-        // TODO: Guardar la tarea nueva y devolverla con su identificador.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        String sql = "INSERT INTO tareas_jdbc (id, titulo) VALUES (?,?)";
+
+        jdbc.update(sql, tarea.identificador(), tarea.nombre());
+
+        return tarea;
+
     }
 
     @Override
     public Optional<Tarea> update(Tarea tarea) {
-        // TODO: Actualizar una tarea existente.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        String sql = "UPDATE tareas_jdbc SET titulo = ? WHERE id = ?";
+
+        int filasActualizar = jdbc.update(sql, tarea.nombre(), tarea.identificador());
+
+        if (filasActualizar > 0) {
+            return Optional.of(tarea);
+        }
+        return Optional.empty();
     }
 
     @Override
     public boolean delete(long id) {
-        // TODO: Eliminar la tarea y comunicar si existía.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        String sql = "DELETE FROM tareas_jdbc WHERE id = ?";
+
+        int filasEliminar = jdbc.update(sql, id);
+
+        if (filasEliminar > 0) {
+            return true;
+        }
+        return false;
     }
 }

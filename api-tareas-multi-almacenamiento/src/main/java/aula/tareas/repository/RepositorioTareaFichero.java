@@ -12,31 +12,53 @@ abstract class RepositorioTareaFichero implements ITareaRepository {
 
     @Override
     public synchronized List<Tarea> findAll() {
-        // TODO: Leer el documento XML y recuperar sus tareas.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        return readAll();
     }
 
     @Override
     public synchronized Optional<Tarea> findById(long id) {
-        // TODO: Buscar una tarea por identificador.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        return findAll().stream().filter(tarea -> tarea.identificador() == id).findFirst();
     }
 
     @Override
     public synchronized Tarea create(Tarea tarea) {
-        // TODO: Guardar la tarea nueva y devolverla con su identificador.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        List<Tarea> tareas = findAll();
+
+        long id = tareas.stream()
+                .mapToLong(Tarea::identificador)
+                .max()
+                .orElse(0) + 1;
+
+        Tarea tareaCreada = new Tarea(id, tarea.nombre());
+
+        tareas.add(tareaCreada);
+        writeAll(tareas);
+
+        return tareaCreada;
     }
 
     @Override
     public synchronized Optional<Tarea> update(Tarea tarea) {
-        // TODO: Actualizar una tarea existente.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        List<Tarea> tareas = findAll();
+
+        for (int i = 0; i < tareas.size(); i++) {
+            if (tareas.get(i).identificador() == tarea.identificador()) {
+                tareas.set(i, tarea);
+                writeAll(tareas);
+                return Optional.of(tarea);
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override
     public synchronized boolean delete(long id) {
-        // TODO: Eliminar la tarea y comunicar si existía.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        List<Tarea> items = findAll();
+        boolean removed = items.removeIf(t -> t.identificador() == id);
+        if (removed) {
+            writeAll(items);
+        }
+        return false;
     }
 }

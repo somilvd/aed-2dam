@@ -8,6 +8,8 @@ import com.fasterxml.jackson.annotation.JsonRootName;
 import tools.jackson.dataformat.xml.XmlMapper;
 import tools.jackson.dataformat.xml.annotation.JacksonXmlElementWrapper;
 import tools.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
@@ -24,6 +26,13 @@ public class TareaRepositoryXml extends RepositorioTareaFichero {
     }
 
     public TareaRepositoryXml(Path path) {
+        if (!Files.exists(path)) {
+            try {
+                Files.createFile(path);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+        }
         this.path = path;
     }
 
@@ -50,13 +59,25 @@ public class TareaRepositoryXml extends RepositorioTareaFichero {
 
     @Override
     List<Tarea> readAll() {
-        // TODO: Leer el documento XML y recuperar sus tareas.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        try {
+            DocumentoXml documento = mapper.readValue(path.toFile(), DocumentoXml.class);
+
+            return documento.getTareas().stream()
+                    .map(entidad -> new Tarea(entidad.getIdTarea(), entidad.getNombreTarea()))
+                    .toList();
+
+        } catch (Exception e) {
+            return List.of();
+        }
     }
 
     @Override
     void writeAll(List<Tarea> tareas) {
-        // TODO: Convertir las tareas y escribir el documento XML.
-        throw new UnsupportedOperationException("Pendiente de implementar");
+        List<TareaEntityXml> entities = tareas.stream()
+                .map(tarea -> new TareaEntityXml(tarea.identificador(), tarea.nombre()))
+                .toList();
+
+        DocumentoXml documento = new DocumentoXml(entities);
+        mapper.writeValue(path.toFile(), documento);
     }
 }
