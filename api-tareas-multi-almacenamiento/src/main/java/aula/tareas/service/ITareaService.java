@@ -6,6 +6,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ITareaService {
+
+    /**
+     * Metodo que lista todas las tareas
+     * @return Lista de tareas
+     */
     List<Tarea> listar();
 
     Optional<Tarea> buscar(long id);

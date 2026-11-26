@@ -1,5 +1,6 @@
 package aula.tareas.mapper;
 
+import aula.tareas.api.TareaRequest;
 import aula.tareas.entity.TareaEntityJdbc;
 import aula.tareas.modelo.Tarea;
 
@@ -13,4 +14,5 @@ public final class TareaMapperJdbc {
     public static Tarea toDomain(TareaEntityJdbc entity) {
         return new Tarea(entity.idTarea(), entity.nombreTarea());
     }
+
 }

@@ -42,7 +42,7 @@ abstract class RepositorioTareaFichero implements ITareaRepository {
         List<Tarea> tareas = findAll();
 
         for (int i = 0; i < tareas.size(); i++) {
-            if (tareas.get(i).identificador() == tarea.identificador()) {
+            if (tareas.get(i).identificador().equals(tarea.identificador())) {
                 tareas.set(i, tarea);
                 writeAll(tareas);
                 return Optional.of(tarea);
